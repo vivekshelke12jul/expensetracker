@@ -28,4 +28,8 @@ public class Expense {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private AppUser appUser;
 }

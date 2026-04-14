@@ -1,11 +1,13 @@
 package com.vivek.expensetracker.controller;
 
 import com.vivek.expensetracker.exchange.request.ExpenseRequest;
+import com.vivek.expensetracker.exchange.response.ExpenseResponse;
 import com.vivek.expensetracker.model.Expense;
 import com.vivek.expensetracker.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,33 +21,38 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        List<Expense> allExpenses = expenseService.getAllExpenses();
+    public ResponseEntity<List<ExpenseResponse>> getAllExpenses(Authentication authentication) {
+        String username = authentication.getName();
+        List<ExpenseResponse> allExpenses = expenseService.getAllExpenses(username);
         return new ResponseEntity<>(allExpenses, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Expense> getExpenseById(@PathVariable Long id) {
-        Expense expense = expenseService.getExpenseById(id);
-        return new ResponseEntity<Expense>(expense, HttpStatus.OK);
+    public ResponseEntity<ExpenseResponse> getExpenseById(Authentication authentication, @PathVariable Long id) {
+        String username = authentication.getName();
+        ExpenseResponse expense = expenseService.getExpenseById(username, id).get();
+        return new ResponseEntity<ExpenseResponse>(expense, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Expense> createExpense(@RequestBody ExpenseRequest expenseRequest) {
-        Expense createdExpense = expenseService.createExpense(expenseRequest);
-        return new ResponseEntity<Expense>(createdExpense, HttpStatus.CREATED);
+    public ResponseEntity<ExpenseResponse> createExpense(Authentication authentication, @RequestBody ExpenseRequest expenseRequest) {
+        String username = authentication.getName();
+        ExpenseResponse createdExpense = expenseService.createExpense(username, expenseRequest);
+        return new ResponseEntity<ExpenseResponse>(createdExpense, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody ExpenseRequest expenseRequest) {
-        Expense updatedExpense = expenseService.updateExpense(id, expenseRequest);
-        return new ResponseEntity<Expense>(updatedExpense, HttpStatus.OK);
+    public ResponseEntity<ExpenseResponse> updateExpense(Authentication authentication, @PathVariable Long id, @RequestBody ExpenseRequest expenseRequest) {
+        String username = authentication.getName();
+        ExpenseResponse updatedExpense = expenseService.updateExpense(username, id, expenseRequest);
+        return new ResponseEntity<ExpenseResponse>(updatedExpense, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Expense> deleteExpense(@PathVariable Long id) {
-        expenseService.deleteExpense(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<Expense> deleteExpense(Authentication authentication, @PathVariable Long id) {
+        String username = authentication.getName();
+        expenseService.deleteExpense(username, id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
